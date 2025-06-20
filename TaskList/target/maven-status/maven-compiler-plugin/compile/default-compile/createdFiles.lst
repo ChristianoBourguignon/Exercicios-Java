@@ -1,0 +1,5 @@
+br\com\tasklist\services\ExportadorPDF.class
+br\com\tasklist\Main.class
+br\com\tasklist\services\ExportadorExcel.class
+br\com\tasklist\TarefasController.class
+br\com\tasklist\Tarefa.class
