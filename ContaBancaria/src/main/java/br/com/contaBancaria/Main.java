@@ -6,6 +6,8 @@ import br.com.contaBancaria.Exception.ExceptionCustom;
 import br.com.contaBancaria.Exception.NoExistsAccountException;
 import br.com.contaBancaria.Models.ContaBancaria;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.Scanner;
 
 public class Main {
@@ -31,11 +33,11 @@ public class Main {
                         System.out.println("Digite o nome do conta: ");
                         String nome = sc.nextLine();
                         System.out.println("Digite o saldo do conta: ");
-                        double saldo = sc.nextDouble();
+                        BigDecimal saldo = sc.nextBigDecimal();
                         System.out.println("Digite o cheque especial: ");
-                        double chequeEspecial = sc.nextDouble();
+                        BigDecimal chequeEspecial = sc.nextBigDecimal();
 
-                        if (nome.isEmpty() || saldo < 0 || chequeEspecial < 0) {
+                        if (nome.isEmpty() || saldo.compareTo(BigDecimal.ZERO) < 0 || chequeEspecial.compareTo(BigDecimal.ZERO) < 0) {
                             throw new DadosInvalidosException("Dados de cadastros inválidos!");
                         }
                         conta = new ContaBancaria(nome, saldo, chequeEspecial);
@@ -61,15 +63,22 @@ public class Main {
                     try {
                         if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
                         System.out.println("Digite o valor que deseja adicionar: ");
-                        cc.AdicionarSaldo(sc.nextDouble());
+                        cc.AdicionarSaldo(sc.nextBigDecimal());
                     } catch (NoExistsAccountException e) {
                         throw new ExceptionCustom("Erro ao consultar saldo: ",
                                 new NoExistsAccountException(e.getMessage()));
                     }
                     break;
                 case 4:
+                    if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
+                    System.out.println("Digite o valor que deseja retirar: ");
+                    BigDecimal retirar = sc.nextBigDecimal();
+                    cc.RetirarSaldo(retirar);
+                    System.out.printf("Digite o valor %.2f retirado da sua conta. Seu saldo atual: %s",retirar, NumberFormat.getCurrencyInstance().format(conta.getSaldo()));
                     break;
                 case 5:
+                    if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
+                    cc.consultarSaldo();
                     break;
                 case 6:
                     break;
