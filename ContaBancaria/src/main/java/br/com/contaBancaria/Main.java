@@ -36,7 +36,7 @@ public class Main {
                         double chequeEspecial = sc.nextDouble();
 
                         if (nome.isEmpty() || saldo < 0 || chequeEspecial < 0) {
-                            throw new DadosInvalidosException("Dados de cadastros inválidos");
+                            throw new DadosInvalidosException("Dados de cadastros inválidos!");
                         }
                         conta = new ContaBancaria(nome, saldo, chequeEspecial);
                         cc = new ContaControllers(conta);
