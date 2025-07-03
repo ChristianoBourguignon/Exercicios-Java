@@ -1,5 +1,6 @@
 import br.com.contaBancaria.Controllers.ContaControllers;
 import br.com.contaBancaria.Models.ContaBancaria;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -7,9 +8,13 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AdicionarSaldoTest {
-    ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"),new BigDecimal("200"));
-    ContaControllers cc = new ContaControllers(con);
+    ContaControllers cc;
 
+    @BeforeEach
+    public void config() {
+        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"),new BigDecimal("200"));
+        cc = new ContaControllers(con);
+    }
     @Test
     public void adicionarSaldo() {
         //Actions

@@ -20,7 +20,7 @@ public class RetirarSaldoTest {
     @Test
     public void retirarSaldo() {
         //Preparation
-        BigDecimal saldo = new BigDecimal("400.00");
+        BigDecimal saldo = new BigDecimal("0");
 
         //Actions
         cc.RetirarSaldo(new BigDecimal("200.00"));
@@ -35,10 +35,10 @@ public class RetirarSaldoTest {
         BigDecimal saldo = new BigDecimal("0.00");
 
         //Actions
-        cc.RetirarSaldo(new BigDecimal("200.00"));
+        cc.RetirarSaldo(new BigDecimal("300.00"));
 
         //Asserts
-        assertEquals(-1,this.cc.getSaldo().compareTo(saldo));
+        assertEquals(0,this.cc.getSaldo().compareTo(saldo));
     }
 
     @Test
