@@ -84,10 +84,7 @@ public class ContaControllers {
     public void pagarBoleto(BigDecimal valorDoBoleto) {
         try {
             retirarSaldo(valorDoBoleto);
-        } catch (InsufficientFundsException ex) {
-            throw new ExceptionCustom("Erro ao realizar o pagamendo do boleto: ",
-                    ex);
-        } catch (IllegalArgumentException ex){
+        } catch (InsufficientFundsException | DadosInvalidosException | IllegalArgumentException ex) {
             throw new ExceptionCustom("Erro ao realizar o pagamento do boleto: ", ex);
         }
     }
