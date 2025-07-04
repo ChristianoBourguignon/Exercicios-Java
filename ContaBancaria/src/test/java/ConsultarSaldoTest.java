@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConsultarSaldoTest {
     ContaControllers cc;
@@ -30,11 +29,37 @@ public class ConsultarSaldoTest {
     public void ConsultarChequeEspecial() {
         //Preparation
         BigDecimal saldo = new BigDecimal("400.00");
+        BigDecimal chequeEspecial = new BigDecimal("0.00");
 
         //Actions
-        cc.RetirarSaldo(saldo);
+        cc.retirarSaldo(saldo);
 
         //Asserts
-        assertTrue(cc.getUsandoChequeEspecial());
+        assertEquals(chequeEspecial,cc.getChequeEspecial());
     }
+
+    @Test
+    public void getSaldoTotalAposRetiradaParcialDoChequeEspecial() {
+        //Preparation
+        BigDecimal saldoTotalEsperado = new BigDecimal("100.00");
+
+        //Actions
+        cc.retirarSaldo(new BigDecimal("300"));
+
+        //Asserts
+        assertEquals(0, cc.getSaldoTotal().compareTo(saldoTotalEsperado));
+    }
+
+    @Test
+    public void temSaldoPositivoComSaldoZerado() {
+        //Preparation
+        BigDecimal saldoZerado = new BigDecimal("100.00");
+
+        //Actions
+        cc.retirarSaldo(saldoZerado);
+
+        //Asserts
+        assertTrue(cc.temSaldoPositivo());
+    }
+
 }
