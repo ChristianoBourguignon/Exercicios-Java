@@ -1,4 +1,5 @@
 import br.com.contaBancaria.Controllers.ContaControllers;
+import br.com.contaBancaria.Exception.DadosInvalidosException;
 import br.com.contaBancaria.Exception.ExceptionCustom;
 import br.com.contaBancaria.Models.ContaBancaria;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,17 +82,20 @@ public class RetirarSaldoTest {
     @Test
     public void retirarSaldoComValorNullDeveLancarExcecao() {
         //Asserts
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(DadosInvalidosException.class, () -> {
             cc.retirarSaldo(null);
         });
     }
 
     @Test
     public void retirarSaldoComValorZeroDeveLancarExcecao() {
-        //Asserts
-        assertThrows(IllegalArgumentException.class, () -> {
+        //Actions
+        ExceptionCustom ex = assertThrows(ExceptionCustom.class, () -> {
             cc.retirarSaldo(BigDecimal.ZERO);
         });
+
+        //Asserts
+        assertInstanceOf(DadosInvalidosException.class, ex.getCause());
     }
 
     @Test
@@ -102,7 +106,7 @@ public class RetirarSaldoTest {
         });
 
         //Asserts
-        assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+        assertInstanceOf(DadosInvalidosException.class, ex.getCause());
     }
 
     @Test

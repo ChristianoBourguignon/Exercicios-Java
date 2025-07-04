@@ -29,19 +29,20 @@ public class AdicionarSaldoTest {
     @Test
     public void adicionarSaldoComChequeEspecial() {
         //Preparation
-        ContaBancaria conta = new ContaBancaria("NUBANK",new BigDecimal("0"),new BigDecimal("200"));
+        ContaBancaria conta = new ContaBancaria("NUBANK",new BigDecimal("0"),new BigDecimal("200.00"));
         conta.setUsandoChequeEspecial(true);
         cc = new ContaControllers(conta);
+        BigDecimal saldoVerificador = new BigDecimal("200.00");
 
         //Actions
-        cc.adicionarSaldo(new BigDecimal("200"));
+        cc.adicionarSaldo(new BigDecimal("200.00"));
 
         //Asserts
-        assertEquals(0, cc.getSaldoTotal().compareTo(BigDecimal.ZERO));
-        assertEquals(-1, cc.getSaldoTotal().compareTo(new BigDecimal("200.00")));
+        assertEquals(1, cc.getSaldo().compareTo(BigDecimal.ZERO));
+        assertEquals(0, cc.getSaldo().compareTo(saldoVerificador));
         assertFalse(cc.getUsandoChequeEspecial());
-        assertEquals(new BigDecimal(0), cc.getSaldo());
-        assertEquals(new BigDecimal(0), cc.getChequeEspecial());
+        assertEquals(saldoVerificador, cc.getSaldo());
+        assertEquals(saldoVerificador, cc.getChequeEspecial());
 
     }
 
