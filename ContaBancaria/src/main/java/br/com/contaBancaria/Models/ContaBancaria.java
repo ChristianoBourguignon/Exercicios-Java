@@ -3,23 +3,21 @@ package br.com.contaBancaria.Models;
 import java.math.BigDecimal;
 
 public class ContaBancaria {
-    private String nome;
+    private final String nome;
     private BigDecimal saldo;
-    private BigDecimal saldoTotal;
-    private BigDecimal ChequeEspecial;
+    private BigDecimal chequeEspecial;
     private boolean usandoChequeEspecial;
-    public ContaBancaria(String nome,BigDecimal saldo, BigDecimal ChequeEspecial) {
+    private BigDecimal limitCheque;
+
+    public ContaBancaria(String nome,BigDecimal saldo, BigDecimal chequeEspecial) {
         this.nome = nome;
         this.saldo = saldo;
-        this.ChequeEspecial = ChequeEspecial;
+        this.chequeEspecial = chequeEspecial;
         this.usandoChequeEspecial = false;
-        this.saldoTotal = getSaldoTotal();
+        this.limitCheque = chequeEspecial;
     }
     public String getNome() {
         return nome;
-    }
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public boolean getUsandoChequeEspecial() {
@@ -35,13 +33,18 @@ public class ContaBancaria {
         this.saldo = saldo;
     }
     public BigDecimal getChequeEspecial() {
-        return ChequeEspecial;
+        return chequeEspecial;
     }
     public void setChequeEspecial(BigDecimal ChequeEspecial) {
-        this.ChequeEspecial = ChequeEspecial;
+        this.chequeEspecial = ChequeEspecial;
     }
     public BigDecimal getSaldoTotal() {
-        return this.getSaldo().add(this.ChequeEspecial);
+        return this.getSaldo().add(this.chequeEspecial);
     }
-    public void setSaldoTotal(BigDecimal saldo) {this.saldoTotal = saldo;}
+    public BigDecimal getLimitCheque() {
+        return this.limitCheque;
+    }
+    public void setLimitCheque(BigDecimal limitCheque) {
+        this.limitCheque = limitCheque;
+    }
 }

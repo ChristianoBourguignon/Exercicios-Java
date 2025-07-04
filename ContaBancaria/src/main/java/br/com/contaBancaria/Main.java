@@ -17,7 +17,6 @@ public class Main {
         ContaBancaria conta = null;
         ContaControllers cc = null;
         while (true) {
-
             System.out.println("======================");
             System.out.println("1 - Cadastrar Conta");
             System.out.println("2 - Consultar Conta");
@@ -26,10 +25,13 @@ public class Main {
             System.out.println("5 - Consultar Saldo");
             System.out.println("6 - Consultar Cheque Especial");
             System.out.println("7 - Pagar Boleto");
+            System.out.println("0 - Sair");
             System.out.println("======================");
+            System.out.print("Digite sua opção:");
             switch (sc.nextInt()) {
                 case 1:
                     try {
+                        sc.nextLine();
                         System.out.println("Digite o nome do conta: ");
                         String nome = sc.nextLine();
                         System.out.println("Digite o saldo do conta: ");
@@ -48,48 +50,44 @@ public class Main {
                     }
                     break;
                 case 2:
-                    try {
-                        if(conta != null) {
-                            cc.consultarSaldo();
-                        } else {
-                            throw new NoExistsAccountException("Não existe conta criada");
-                        }
-                    } catch (NoExistsAccountException e) {
-                        throw new ExceptionCustom("Erro ao consultar saldo: ",
-                                new NoExistsAccountException(e.getMessage()));
-                    }
+                    verificarConta(conta);
+                    cc.consultarConta();
                     break;
                 case 3:
-                    try {
-                        if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
-                        System.out.println("Digite o valor que deseja adicionar: ");
-                        cc.AdicionarSaldo(sc.nextBigDecimal());
-                    } catch (NoExistsAccountException e) {
-                        throw new ExceptionCustom("Erro ao consultar saldo: ",
-                                new NoExistsAccountException(e.getMessage()));
-                    }
+                    verificarConta(conta);
+                    System.out.println("Digite o valor que deseja adicionar: ");
+                    cc.adicionarSaldo(sc.nextBigDecimal());
                     break;
                 case 4:
-                    if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
+                    verificarConta(conta);
                     System.out.println("Digite o valor que deseja retirar: ");
                     BigDecimal retirar = sc.nextBigDecimal();
-                    cc.RetirarSaldo(retirar);
-                    System.out.printf("Digite o valor %.2f retirado da sua conta. Seu saldo atual: %s",retirar, NumberFormat.getCurrencyInstance().format(conta.getSaldo()));
+                    cc.retirarSaldo(retirar);
+                    cc.consultarSaldo();
                     break;
                 case 5:
-                    if(conta == null) {throw new NoExistsAccountException("Não existe conta criada");}
+                    verificarConta(conta);
                     cc.consultarSaldo();
                     break;
                 case 6:
+                    verificarConta(conta);
+                    cc.consultarChequeEspecial();
                     break;
                 case 7:
+                    verificarConta(conta);
+                    System.out.println("Digite o valor do boleto: ");
+                    cc.pagarBoleto(sc.nextBigDecimal());
                     break;
                 default:
-                    System.out.println("Menu inválido, tente novamente.");
+                    System.out.println("Opção inválida, tente novamente.");
                     break;
             }
-
         }
-
+    }
+    public static void verificarConta(ContaBancaria conta){
+        if (conta == null) {
+            throw new ExceptionCustom("Erro ao executar a operação: ", 
+                    new NoExistsAccountException("Conta não criada!"));
+        }
     }
 }
