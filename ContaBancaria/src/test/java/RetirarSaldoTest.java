@@ -88,14 +88,11 @@ public class RetirarSaldoTest {
     }
 
     @Test
-    public void retirarSaldoComValorZeroDeveLancarExcecao() {
-        //Actions
-        ExceptionCustom ex = assertThrows(ExceptionCustom.class, () -> {
+    public void retirarSaldoComZeroDeveLancarException() {
+        // Asserts
+        DadosInvalidosException ex = assertThrows(DadosInvalidosException.class, () -> {
             cc.retirarSaldo(BigDecimal.ZERO);
         });
-
-        //Asserts
-        assertInstanceOf(DadosInvalidosException.class, ex.getCause());
     }
 
     @Test
