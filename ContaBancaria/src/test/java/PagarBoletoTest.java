@@ -14,7 +14,7 @@ public class PagarBoletoTest {
 
     @BeforeEach
     public void config() {
-        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"),new BigDecimal("200"));
+        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"));
         cc = new ContaControllers(con);
     }
 
@@ -35,16 +35,16 @@ public class PagarBoletoTest {
     @Test
     public void pagarBoletoComChequeEspecial() {
         //Preparation
-        BigDecimal valorBoleto = new BigDecimal("300");
-        BigDecimal valorChequeEsperado = new BigDecimal("100");
+        BigDecimal valorBoleto = new BigDecimal("220.00");
+        BigDecimal valorChequeEsperado = new BigDecimal("30.00");
 
         //Actions
         cc.pagarBoleto(valorBoleto);
 
         //Asserts
         assertTrue(cc.getUsandoChequeEspecial());
-        assertEquals(0, cc.getSaldo().compareTo(BigDecimal.ZERO));
-        assertEquals(0, cc.getChequeEspecial().compareTo(valorChequeEsperado));
+        assertEquals(valorChequeEsperado, cc.getSaldoTotal());
+        assertEquals(valorChequeEsperado, cc.getChequeEspecial());
     }
 
     @Test

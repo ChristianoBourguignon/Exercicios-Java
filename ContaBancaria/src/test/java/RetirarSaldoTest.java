@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +15,7 @@ public class RetirarSaldoTest {
 
     @BeforeEach
     public void config() {
-        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"),new BigDecimal("200"));
+        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"));
         cc = new ContaControllers(con);
     }
 
@@ -36,7 +37,7 @@ public class RetirarSaldoTest {
         BigDecimal saldo = new BigDecimal("0.00");
 
         //Actions
-        cc.retirarSaldo(new BigDecimal("300.00"));
+        cc.retirarSaldo(new BigDecimal("250.00"));
 
         //Asserts
         assertEquals(0,this.cc.getSaldo().compareTo(saldo));
@@ -45,19 +46,22 @@ public class RetirarSaldoTest {
     @Test
     public void consultarChequeEspecialAposRetirada() {
         //Preparation
-        BigDecimal saldo = new BigDecimal("0.00");
+        BigDecimal saldoChequeEsperado = new BigDecimal("0.00");
+        BigDecimal saldoEsperado = new BigDecimal("0");
+        BigDecimal saldoRetirado = new BigDecimal("250.00");
 
         //Actions
-        cc.retirarSaldo(new BigDecimal("400.00"));
+        cc.retirarSaldo(saldoRetirado);
 
         //Asserts
-        assertEquals(0,this.cc.getChequeEspecial().compareTo(saldo));
+        assertEquals(saldoEsperado,cc.getSaldo());
+        assertEquals(saldoChequeEsperado,cc.getSaldoTotal());
     }
 
     @Test
     public void consultarUsandoChequeEspecial() {
         //Preparation
-        BigDecimal saldo = new BigDecimal("400.00");
+        BigDecimal saldo = new BigDecimal("100.00");
 
         //Actions
         cc.retirarSaldo(saldo);
@@ -69,14 +73,16 @@ public class RetirarSaldoTest {
     @Test
     public void valorDoChequeAposRetirada() {
         //Preparation
-        BigDecimal saldoCheque = new BigDecimal("150.00");
+        BigDecimal saldoChequeVerificador = new BigDecimal("20.00");
+        BigDecimal saldoVerificador = new BigDecimal(BigInteger.ZERO);
+        BigDecimal valorRetiradoDoSaldo = new BigDecimal("230.00");
 
         //Actions
-        cc.retirarSaldo(new BigDecimal("250.00"));
+        cc.retirarSaldo(valorRetiradoDoSaldo);
 
         //Asserts
-        assertEquals(0,this.cc.getChequeEspecial().compareTo(saldoCheque));
-        assertEquals(new BigDecimal("150.00"),this.cc.getChequeEspecial());
+        assertEquals(saldoVerificador,cc.getSaldo());
+        assertEquals(saldoChequeVerificador,cc.getChequeEspecial());
     }
 
     @Test
@@ -109,10 +115,10 @@ public class RetirarSaldoTest {
     @Test
     public void retirarSaldoEAdicionarSaldo() {
         //Preparation
-        BigDecimal saldoAdicionado = new BigDecimal("20.00");
         BigDecimal saldoRetirado = new BigDecimal("210.00");
+        BigDecimal saldoAdicionado = new BigDecimal("20.00");
         BigDecimal saldoVerificador = new BigDecimal("10.00");
-        BigDecimal chequeVerificador = new BigDecimal("200.00");
+        BigDecimal chequeVerificador = new BigDecimal("50.00");
 
         //Actions
         cc.retirarSaldo(saldoRetirado);

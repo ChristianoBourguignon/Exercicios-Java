@@ -12,7 +12,7 @@ public class ConsultarSaldoTest {
 
     @BeforeEach
     public void config() {
-        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"),new BigDecimal("200"));
+        ContaBancaria con = new ContaBancaria("NUBANK",new BigDecimal("200"));
         cc = new ContaControllers(con);
     }
 
@@ -28,8 +28,8 @@ public class ConsultarSaldoTest {
     @Test
     public void ConsultarChequeEspecial() {
         //Preparation
-        BigDecimal saldo = new BigDecimal("400.00");
-        BigDecimal chequeEspecial = new BigDecimal("0.00");
+        BigDecimal saldo = new BigDecimal("200.00");
+        BigDecimal chequeEspecial = new BigDecimal("50.00");
 
         //Actions
         cc.retirarSaldo(saldo);
@@ -41,13 +41,14 @@ public class ConsultarSaldoTest {
     @Test
     public void getSaldoTotalAposRetiradaParcialDoChequeEspecial() {
         //Preparation
-        BigDecimal saldoTotalEsperado = new BigDecimal("100.00");
+        BigDecimal saldoTotalEsperado = new BigDecimal("30.00");
+
 
         //Actions
-        cc.retirarSaldo(new BigDecimal("300"));
+        cc.retirarSaldo(new BigDecimal("220"));
 
         //Asserts
-        assertEquals(0, cc.getSaldoTotal().compareTo(saldoTotalEsperado));
+        assertEquals(saldoTotalEsperado, cc.getSaldoTotal());
     }
 
     @Test
