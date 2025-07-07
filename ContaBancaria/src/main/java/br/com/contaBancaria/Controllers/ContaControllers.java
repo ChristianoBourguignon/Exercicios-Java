@@ -29,6 +29,8 @@ public class ContaControllers {
             throw new DadosInvalidosException("Valor para adicionar deve ser maior que zero.");
         }
         if (this.conta.getUsandoChequeEspecial()) {
+//            Caso o limite de cheque especial seja usado, assim que possível a conta deve cobrar
+//            uma taxa de 20% do valor usado do cheque especial
             BigDecimal limite = this.conta.getChequeEspecial();
             BigDecimal limiteTotal = this.conta.getLimitCheque();
 
@@ -43,6 +45,11 @@ public class ContaControllers {
             }
 
             if (this.conta.getChequeEspecial().compareTo(limiteTotal) == 0) {
+                if(this.getSaldo().compareTo(limiteTotal) > 0) {
+                    BigDecimal juros = saldo.multiply(new BigDecimal("0.2"));
+                    this.conta.setSaldo(getSaldo().subtract(juros));
+                }
+                this.conta.setChequeEspecial(limiteTotal);
                 this.conta.setUsandoChequeEspecial(false);
             }
         } else {
@@ -64,7 +71,7 @@ public class ContaControllers {
         }
 
         // Se ainda tiver valor, terá que usar o cheque especial
-        if (valorParaRetirar.compareTo(BigDecimal.ZERO) >= 0) {
+        if (valorParaRetirar.compareTo(BigDecimal.ZERO) > 0) {
             this.conta.setUsandoChequeEspecial(true);
             retirarSaldoDoChequeEspecial(valorParaRetirar);
         }

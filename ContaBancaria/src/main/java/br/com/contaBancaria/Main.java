@@ -7,7 +7,7 @@ import br.com.contaBancaria.Exception.NoExistsAccountException;
 import br.com.contaBancaria.Models.ContaBancaria;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
+
 import java.util.Scanner;
 
 public class Main {
@@ -36,13 +36,11 @@ public class Main {
                         String nome = sc.nextLine();
                         System.out.println("Digite o saldo do conta: ");
                         BigDecimal saldo = sc.nextBigDecimal();
-                        System.out.println("Digite o cheque especial: ");
-                        BigDecimal chequeEspecial = sc.nextBigDecimal();
 
-                        if (nome.isEmpty() || saldo.compareTo(BigDecimal.ZERO) < 0 || chequeEspecial.compareTo(BigDecimal.ZERO) < 0) {
+                        if (nome.isEmpty() || saldo.compareTo(BigDecimal.ZERO) < 0 ) {
                             throw new DadosInvalidosException("Dados de cadastros inválidos!");
                         }
-                        conta = new ContaBancaria(nome, saldo, chequeEspecial);
+                        conta = new ContaBancaria(nome, saldo);
                         cc = new ContaControllers(conta);
                     } catch (DadosInvalidosException e) {
                         throw new ExceptionCustom("Erro ao criar uma conta bancária: ",

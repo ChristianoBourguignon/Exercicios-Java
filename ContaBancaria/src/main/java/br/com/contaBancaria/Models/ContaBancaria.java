@@ -1,6 +1,10 @@
 package br.com.contaBancaria.Models;
 
+import br.com.contaBancaria.Exception.DadosInvalidosException;
+import br.com.contaBancaria.Exception.ExceptionCustom;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ContaBancaria {
     private final String nome;
@@ -9,12 +13,25 @@ public class ContaBancaria {
     private boolean usandoChequeEspecial;
     private BigDecimal limitCheque;
 
-    public ContaBancaria(String nome,BigDecimal saldo, BigDecimal chequeEspecial) {
+    public ContaBancaria(String nome,BigDecimal saldo) {
+
+        if (saldo == null || saldo.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ExceptionCustom("Erro ao criar a conta bancária", new DadosInvalidosException("Valor para adicionar deve ser maior que zero."));
+        }
         this.nome = nome;
         this.saldo = saldo;
-        this.chequeEspecial = chequeEspecial;
         this.usandoChequeEspecial = false;
-        this.limitCheque = chequeEspecial;
+
+        if (saldo.compareTo(new BigDecimal("500.00")) <= 0) {
+            this.limitCheque = new BigDecimal("50.00");
+            this.chequeEspecial = new BigDecimal("50.00");
+        } else {
+            BigDecimal divisor = new BigDecimal("2");
+            BigDecimal limite = saldo.divide(divisor,RoundingMode.DOWN);
+            this.limitCheque = limite;
+            this.chequeEspecial = limite;
+        }
+
     }
     public String getNome() {
         return nome;
