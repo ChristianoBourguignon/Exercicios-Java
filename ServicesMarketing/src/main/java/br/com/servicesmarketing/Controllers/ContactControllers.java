@@ -21,7 +21,7 @@ public class ContactControllers implements Logger {
                 throw new MapContactsInvalidException("Added contact failed");
             }
         } catch(MapContactsInvalidException e){
-            logger.error("Error while adding contact", e);
+            getLogger().error("Error while adding contact", e);
         }
     }
     public Map<String, Person> getContacts() {

@@ -1,19 +1,17 @@
 package br.com.servicesmarketing.Models;
 
 import br.com.servicesmarketing.Exception.NumberLenghtInvalidExeception;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import br.com.servicesmarketing.Models.Logger;
 import java.security.InvalidParameterException;
 
 
-public class Person {
+public class Person implements Logger {
     private String name;
     private String whatsapp;
     private String number;
     private String email;
-    private static final Logger logger = LoggerFactory.getLogger(Person.class);
 
-    public Person(String name, String number, String email) {
+    public Person(String name, String number, String email){
         try {
 
             this.name = name.toUpperCase();
@@ -40,7 +38,7 @@ public class Person {
             }
 
         } catch (NumberLenghtInvalidExeception | InvalidParameterException e) {
-            logger.error("Error in process create people: ", e);
+            getLogger().error("Error in process create people: ", e);
         }
     }
 
