@@ -1,158 +1,102 @@
 package br.com.sudoku.controllers;
 
 import br.com.sudoku.model.GameStatusEnum;
-import br.com.sudoku.util.SudokuCell;
+import br.com.sudoku.model.SudokuCell;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static br.com.sudoku.model.GameStatusEnum.*;
 import static java.util.Objects.isNull;
 
 public class GameController {
-    final private List<SudokuCell> gameBoard;
+    private Map<JTextField, SudokuCell> gameBoard;
 
-    public GameController(List<SudokuCell> cells) {
-        this.gameBoard = cells;
+    public GameController(Map<JTextField, SudokuCell> gameBoard) {
+        this.gameBoard = gameBoard;
+    }
+    public Map<JTextField, SudokuCell> getMap() {
+        return gameBoard;
     }
 
-    private void inputNumber() {
+    public void startedGame(){
+
+    }
+
+    public void clearGame() {
         if(gameIsStarted()){
             return;
         }
-        System.out.println("Digite um numero da coluna a ser inserido: ");
-        int col = runUntilGetValidNumber(0,8);
-        System.out.println("Digite um numero da linha a ser inserido: ");
-        int row = runUntilGetValidNumber(0,8);
-
-        System.out.printf("Informe o numero que vai entrar na posição [%s,%s]\n",col, row);
-        int value = runUntilGetValidNumber(1,9);
-//        if(!gameBoard.changeValue(col,row,value)){
-//            System.out.printf("A posição [%s,%s] tem um valor fixo\n",col,row);
-//        }
+        gameBoard.entrySet().stream()
+                .filter(entry -> !entry.getValue().isFixed())
+                .forEach(entry -> {
+                    entry.getValue().setValue(null);
+                    entry.getKey().setText("");
+                });
     }
 
-    private void removeNumber() {
-        if(gameIsStarted()){
-            return;
-        }
-        System.out.println("Digite um numero da coluna a ser inserido: ");
-        int col = runUntilGetValidNumber(0,8);
-        System.out.println("Digite um numero da linha a ser inserido: ");
-        int row = runUntilGetValidNumber(0,8);
-
-//        if(!gameBoard.clearValue(col,row)){
-//            System.out.printf("A posição [%s,%s] tem um valor fixo\n",col,row);
-//        }
-    }
-
-    private void showCurrentGame() {
-        if(gameIsStarted()){
-            return;
-        }
-        var args = new Object[81];
-        var argPos = 0;
-//        for (int i = 0; i < BOARD_LIMIT; i++) {
-//            for (var col: board.getSpaces()){
-//                args[argPos ++] = " " + ((isNull(col.get(i).getActual())) ? " " : col.get(i).getActual());
-//            }
-//        }
-//        System.out.println("O jogo se encontra da seguinte forma");
-//        System.out.printf((BOARD_TEMPLATE) + "\n",args);
-
-    }
-
-    private void showGameStatus() {
-        if(gameIsStarted()){
-            return;
-        }
-//        System.out.printf("O jogo se encontra no status %s\n", board.getGameStatus());
-    }
-
-    private void clearGame() {
-        if(gameIsStarted()){
-            return;
-        }
-        System.out.println("Tem certeza que deseja limpar seu jogo e perder todo seu progresso? Ex: sim ou não");
-//        var confirm = sc.next();
-//        while(!confirm.equalsIgnoreCase("sim") && !confirm.equalsIgnoreCase("nao")){
-//            System.out.println("Informe apenas o: sim ou não ");
-//            confirm = sc.next();
-//        }
-//        if(confirm.equalsIgnoreCase("sim")){
-//            board.reset();
-//        }
-    }
-
-    private GameStatusEnum finishGame(Map<JTextField, SudokuCell> sudokuFields) {
+    public GameStatusEnum finishGame() {
+        // Verificar se o jogo ta iniciado
         if (gameIsStarted()) {
             return GameStatusEnum.STARTED;
         }
 
         // Verificar se todas as células estão preenchidas
-        for (SudokuCell cell : sudokuFields.values()) {
-            if (cell.getValue() == 0) {
-                return GameStatusEnum.INCOMPLETE;
-            }
+        if(isHaveCellEmpty()){
+            return INCOMPLETE;
         }
-
-        // Validar todas as células
-        for (SudokuCell cell : sudokuFields.values()) {
-            int row = cell.getRow();
-            int col = cell.getCol();
-            int value = cell.getValue();
-
-            // Valida linha
-            for (SudokuCell other : sudokuFields.values()) {
-                if (other != cell && other.getRow() == row && other.getValue() == value) {
-                    return HAS_ERROR;
-                }
-            }
-
-            // Valida coluna
-            for (SudokuCell other : sudokuFields.values()) {
-                if (other != cell && other.getCol() == col && other.getValue() == value) {
-                    return HAS_ERROR;
-                }
-            }
-
-            // Valida quadrante 3x3
-            int startRow = (row / 3) * 3;
-            int startCol = (col / 3) * 3;
-            for (SudokuCell other : sudokuFields.values()) {
-                if (other != cell) {
-                    int otherRow = other.getRow();
-                    int otherCol = other.getCol();
-                    if (otherRow >= startRow && otherRow < startRow + 3 &&
-                            otherCol >= startCol && otherCol < startCol + 3 &&
-                            other.getValue() == value) {
-                        return HAS_ERROR;
-                    }
-                }
-            }
-        }
-
-        // Se passou em todas as validações
-        return COMPLETE;
+        return isCellValueDuplicated();
     }
 
-    private int runUntilGetValidNumber(final int min, final int max) {
-//        int current = sc.nextInt();
-//        while(current < min || current > max){
-//            System.out.printf("Informe um numero entre: %s e %s\n",min,max);
-//            current = sc.nextInt();
-//        }
-        return 0;
+    private GameStatusEnum isCellValueDuplicated() {
+        List<SudokuCell> cellsPositions = gameBoard.values().stream()
+                .filter(cell -> !cell.isFixed())
+                .toList();
+        Optional<SudokuCell> firstDuplicate = cellsPositions.stream()
+                .filter(this::hasDuplicateInRowOrColumn)
+                .findFirst();
+
+        if (firstDuplicate.isPresent()) {
+            return HAS_ERROR;
+        } else {
+            return COMPLETE;
+        }
+    }
+    public boolean hasDuplicateInRowOrColumn(SudokuCell target) {
+        int row = target.getRow();
+        int col = target.getCol();
+        Integer value = target.getValue();
+        if (value == null) return false;
+
+        // verifica na linha
+        boolean rowConflict = gameBoard.values().stream()
+                .filter(cell -> cell.getRow() == row)
+                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
+
+        // verifica na coluna
+        boolean colConflict = gameBoard.values().stream()
+                .filter(cell -> cell.getCol() == col)
+                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
+
+        return rowConflict || colConflict;
+    }
+
+    private boolean isHaveCellEmpty() {
+        Optional<SudokuCell> isHaveCellEmpty = gameBoard.values().stream()
+                .filter(cell -> !cell.isFixed())
+                .filter(cell -> {
+                    Integer value = cell.getValue();
+                    return value == null || value == 0;
+                })
+                .findFirst();
+        return isHaveCellEmpty.isPresent();
     }
 
     private boolean gameIsStarted(){
-        if(isNull(this.gameBoard)){
-            System.out.println("O jogo não foi iniciado");
-            return true;
-        } else {
-            return false;
-        }
+        return isNull(this.gameBoard);
     }
 }

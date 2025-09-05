@@ -1,6 +1,6 @@
 package br.com.sudoku.ui.custom.Button;
 
-import javax.swing.*;
+import javax.swing.JButton;
 
 public class StartGameButton extends JButton {
     public StartGameButton() {
