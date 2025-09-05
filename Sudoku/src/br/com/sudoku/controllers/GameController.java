@@ -1,13 +1,12 @@
 package br.com.sudoku.controllers;
 
 import br.com.sudoku.model.GameStatusEnum;
-import br.com.sudoku.model.SudokuCell;
+import br.com.sudoku.util.SudokuCell;
 
 import javax.swing.*;
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static br.com.sudoku.model.GameStatusEnum.*;
@@ -23,9 +22,7 @@ public class GameController {
         return gameBoard;
     }
 
-    public void startedGame(){
 
-    }
 
     public void clearGame() {
         if(gameIsStarted()){

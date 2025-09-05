@@ -1,8 +1,8 @@
 package br.com.sudoku;
 
 import br.com.sudoku.ui.View;
-import br.com.sudoku.model.SudokuCell;
 import br.com.sudoku.util.LimitNumberInput;
+import br.com.sudoku.util.SudokuCell;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;

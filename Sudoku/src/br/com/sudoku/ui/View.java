@@ -2,11 +2,11 @@ package br.com.sudoku.ui;
 
 import br.com.sudoku.controllers.GameController;
 import br.com.sudoku.model.GameStatusEnum;
-import br.com.sudoku.model.SudokuCell;
 import br.com.sudoku.ui.custom.Button.ExitGameButton;
 import br.com.sudoku.ui.custom.Button.FinishGameButton;
 import br.com.sudoku.ui.custom.Button.ResetGameButton;
 import br.com.sudoku.ui.custom.Button.StartGameButton;
+import br.com.sudoku.util.SudokuCell;
 
 import javax.swing.*;
 
