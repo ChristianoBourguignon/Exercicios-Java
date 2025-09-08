@@ -2,11 +2,11 @@ package br.com.sudoku.ui;
 
 import br.com.sudoku.controllers.GameController;
 import br.com.sudoku.model.GameStatusEnum;
+import br.com.sudoku.model.SudokuCell;
 import br.com.sudoku.ui.custom.Button.ExitGameButton;
 import br.com.sudoku.ui.custom.Button.FinishGameButton;
 import br.com.sudoku.ui.custom.Button.ResetGameButton;
 import br.com.sudoku.ui.custom.Button.StartGameButton;
-import br.com.sudoku.util.SudokuCell;
 
 import javax.swing.*;
 
@@ -16,6 +16,8 @@ import java.awt.event.ActionListener;
 import java.util.Comparator;
 import java.util.Map;
 
+import static br.com.sudoku.model.GameDifficultyEnum.*;
+
 public class View extends JFrame implements ActionListener {
 
     private StartGameButton btnStart;
@@ -24,9 +26,7 @@ public class View extends JFrame implements ActionListener {
     private ResetGameButton btnReset;
     private GameController gameBoard;
 
-    public View(Map<JTextField, SudokuCell> sc) {
-        this.gameBoard = new GameController(sc);
-
+    public View() {
         this.setTitle("Sudoku");
         this.setSize(600, 800);
         this.setLayout(null);
@@ -36,13 +36,6 @@ public class View extends JFrame implements ActionListener {
         // Painel do tabuleiro 9x9
         JPanel boardPanel = new JPanel(new GridLayout(9, 9));
         boardPanel.setBounds(50, 20, 500, 500);
-
-
-        // Preencher as células
-        this.gameBoard.getMap().entrySet().stream()
-                .sorted(Comparator.comparingInt((Map.Entry<JTextField, SudokuCell> e) -> e.getValue().getRow())
-                        .thenComparingInt(e -> e.getValue().getCol()))
-                .forEach(entry -> boardPanel.add(entry.getKey()));
 
         // Botões
         btnStart = new StartGameButton();
@@ -54,6 +47,11 @@ public class View extends JFrame implements ActionListener {
         btnFinish.addActionListener(this);
         btnReset.addActionListener(this);
         btnExit.addActionListener(this);
+
+//        this.gameBoard.getMap().entrySet().stream()
+//                .sorted(Comparator.comparingInt((Map.Entry<JTextField, SudokuCell> e) -> e.getValue().getRow())
+//                        .thenComparingInt(e -> e.getValue().getCol()))
+//                .forEach(entry -> boardPanel.add(entry.getKey()));
 
         this.add(boardPanel);
         this.add(btnStart);
@@ -67,7 +65,18 @@ public class View extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == btnStart) {
-            JOptionPane.showMessageDialog(this, "Jogo iniciado!");
+            String[] choices = {EASY.getLabel(), MEDIUM.getLabel(), HARD.getLabel()};
+            int optionStartedGame = JOptionPane.showOptionDialog(
+                    this,
+                    "Escolha a dificuldade do jogo",
+                    "Dificuldade",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    choices,
+                    choices[0]
+            );
+            this.gameBoard = new GameController(optionStartedGame);
         }
         if(e.getSource() == btnFinish) {
             int optionFinishGame = JOptionPane.showConfirmDialog(

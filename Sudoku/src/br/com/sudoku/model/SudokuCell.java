@@ -4,7 +4,7 @@ public class SudokuCell {
     private final int row;
     private final int col;
     private Integer value;
-    private final boolean isFixed;
+    private boolean isFixed;
 
     public SudokuCell(int row, int col,int value, boolean isFixed) {
         this.row = row;
@@ -23,6 +23,9 @@ public class SudokuCell {
     }
     public boolean isFixed() {
         return isFixed;
+    }
+    public void setFixed(boolean isFixed) {
+        this.isFixed = isFixed;
     }
     public void setValue(Integer value){
         this.value = value;
