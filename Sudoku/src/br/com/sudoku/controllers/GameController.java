@@ -38,13 +38,14 @@ public class GameController {
         return gameBoard;
     }
 
-    public GameStatusEnum startedGame(GameDifficultyEnum difficulty) {
+    public GameStatusEnum startedGame() {
         if (!isNull(gameBoard)) {
             return STARTED;
         }
         Random rand = new Random();
 
         Map<JTextField, SudokuCell> cells = new HashMap<>();
+        this.gameBoard = cells;
 
         // Cria todos os campos inicialmente vazios
         for (int row = 0; row < 9; row++) {
@@ -70,7 +71,7 @@ public class GameController {
         // Preenche células fixas por quadrante
         for (int blockRow = 0; blockRow < 3; blockRow++) {
             for (int blockCol = 0; blockCol < 3; blockCol++) {
-                int fixedCells = getFixedCellsPerQuadrant(difficulty);
+                int fixedCells = getFixedCellsPerQuadrant(this.gameDifficulty);
 
                 for (int k = 0; k < fixedCells; k++) {
                     boolean placed = false;
@@ -96,12 +97,29 @@ public class GameController {
                             cell.setValue(0);
                             cell.setFixed(false);
                         }
+                        JTextField tf = getTextFieldAt(cells, row, col);
+                            tf.setText(String.valueOf(value));
+                            tf.setEditable(false);
+                            tf.setBackground(new Color(220, 220, 220));
+                            placed = true;
                     }
                 }
             }
         }
         this.gameBoard = cells;
+        this.gameBoard.entrySet().stream().forEach(entry -> {
+            if (entry.getValue().isFixed()) {
+                while(hasDuplicateInRowOrColumn(entry.getValue())) {
+                    setValueCells(entry.getValue());
+                }
+            }
+        });
         return STARTED;
+    }
+    private void setValueCells(SudokuCell cell) {
+        Random rand = new Random();
+        int value = rand.nextInt(9) + 1;
+        cell.setValue(value);
     }
 
     public void clearGame() {
@@ -173,7 +191,7 @@ public class GameController {
         return isHaveCellEmpty.isPresent();
     }
 
-    private boolean gameIsStarted(){
+    public boolean gameIsStarted(){
         return isNull(this.gameBoard);
     }
     private int getFixedCellsPerQuadrant(GameDifficultyEnum difficulty) {
