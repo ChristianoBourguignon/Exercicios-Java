@@ -9,14 +9,12 @@ import br.com.sudoku.ui.custom.Button.ResetGameButton;
 import br.com.sudoku.ui.custom.Button.StartGameButton;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Objects;
 
 import static br.com.sudoku.model.GameDifficultyEnum.*;
 import static java.util.Objects.isNull;

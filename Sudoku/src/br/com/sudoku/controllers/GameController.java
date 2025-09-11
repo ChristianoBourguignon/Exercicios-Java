@@ -42,7 +42,6 @@ public class GameController {
         if (!isNull(gameBoard)) {
             return STARTED;
         }
-        Random rand = new Random();
 
         Map<JTextField, SudokuCell> cells = new HashMap<>();
         this.gameBoard = cells;
@@ -68,58 +67,62 @@ public class GameController {
             }
         }
 
-        // Preenche células fixas por quadrante
-        for (int blockRow = 0; blockRow < 3; blockRow++) {
-            for (int blockCol = 0; blockCol < 3; blockCol++) {
-                int fixedCells = getFixedCellsPerQuadrant(this.gameDifficulty);
-
-                for (int k = 0; k < fixedCells; k++) {
-                    boolean placed = false;
-                    while (!placed) {
-                        int row = blockRow * 3 + rand.nextInt(3);
-                        int col = blockCol * 3 + rand.nextInt(3);
-
-                        SudokuCell cell = getCellAt(cells, row, col);
-                        if (cell.isFixed()) continue; // já preenchida
-
-                        int value = rand.nextInt(9) + 1;
-                        cell.setValue(value);
-                        cell.setFixed(true);
-
-                        if (!hasDuplicateInRowOrColumn(cell)) {
-                            // fixa no JTextField
-                            JTextField tf = getTextFieldAt(cells, row, col);
-                            tf.setText(String.valueOf(value));
-                            tf.setEditable(false);
-                            tf.setBackground(new Color(220, 220, 220));
-                            placed = true;
-                        } else {
-                            cell.setValue(0);
-                            cell.setFixed(false);
-                        }
-                        JTextField tf = getTextFieldAt(cells, row, col);
-                            tf.setText(String.valueOf(value));
-                            tf.setEditable(false);
-                            tf.setBackground(new Color(220, 220, 220));
-                            placed = true;
-                    }
-                }
-            }
-        }
+        // Gera um Sudoku válido completo primeiro
+        generateValidSudoku(cells);
+        
+        // Remove células baseado na dificuldade para criar o puzzle
+        removeCellsForDifficulty(cells);
+        
         this.gameBoard = cells;
-        this.gameBoard.entrySet().stream().forEach(entry -> {
-            if (entry.getValue().isFixed()) {
-                while(hasDuplicateInRowOrColumn(entry.getValue())) {
-                    setValueCells(entry.getValue());
-                }
-            }
-        });
         return STARTED;
     }
-    private void setValueCells(SudokuCell cell) {
-        Random rand = new Random();
-        int value = rand.nextInt(9) + 1;
-        cell.setValue(value);
+
+    public boolean hasDuplicateInRowOrColumnOrBlock(SudokuCell target) {
+        if (target == null) return false;
+
+        // verifica na linha
+        boolean rowConflict = hasDuplicateInRow(target);
+
+        // verifica na coluna
+        boolean colConflict = hasDuplicateInCol(target);
+
+        // verifica o quadrante
+        boolean blockConflict = hasDuplicateInBlock(target);
+
+        return rowConflict || colConflict || blockConflict;
+    }
+    public boolean hasDuplicateInBlock(SudokuCell target) {
+        int row = target.getRow();
+        int col = target.getCol();
+        Integer value = target.getValue();
+        if (value == null || value == 0) return false;
+
+        int startRow = (row / 3) * 3;
+        int startCol = (col / 3) * 3;
+
+        return gameBoard.values().stream()
+                .filter(cell -> cell != target)
+                .filter(cell -> cell.getRow() >= startRow && cell.getRow() < startRow + 3)
+                .filter(cell -> cell.getCol() >= startCol && cell.getCol() < startCol + 3)
+                .anyMatch(cell -> value.equals(cell.getValue()));
+    }
+    public boolean hasDuplicateInRow(SudokuCell target) {
+        int row = target.getRow();
+        Integer value = target.getValue();
+        if (value == null || value == 0) return false;
+
+        return gameBoard.values().stream()
+                .filter(cell -> cell.getRow() == row)
+                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
+    }
+    public boolean hasDuplicateInCol(SudokuCell target) {
+        int col = target.getCol();
+        Integer value = target.getValue();
+        if (value == null || value == 0) return false;
+
+        return gameBoard.values().stream()
+                .filter(cell -> cell.getCol() == col)
+                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
     }
 
     public void clearGame() {
@@ -151,33 +154,15 @@ public class GameController {
         List<SudokuCell> cellsPositions = gameBoard.values().stream()
                 .filter(cell -> !cell.isFixed())
                 .toList();
-        Optional<SudokuCell> firstDuplicate = cellsPositions.stream()
-                .filter(this::hasDuplicateInRowOrColumn)
+        Optional<SudokuCell> validateInputs = cellsPositions.stream()
+                .filter(this::hasDuplicateInRowOrColumnOrBlock)
                 .findFirst();
 
-        if (firstDuplicate.isPresent()) {
+        if (validateInputs.isPresent()) {
             return HAS_ERROR;
         } else {
             return COMPLETE;
         }
-    }
-    public boolean hasDuplicateInRowOrColumn(SudokuCell target) {
-        int row = target.getRow();
-        int col = target.getCol();
-        Integer value = target.getValue();
-        if (value == null) return false;
-
-        // verifica na linha
-        boolean rowConflict = gameBoard.values().stream()
-                .filter(cell -> cell.getRow() == row)
-                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
-
-        // verifica na coluna
-        boolean colConflict = gameBoard.values().stream()
-                .filter(cell -> cell.getCol() == col)
-                .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
-
-        return rowConflict || colConflict;
     }
 
     private boolean isHaveCellEmpty() {
@@ -194,17 +179,6 @@ public class GameController {
     public boolean gameIsStarted(){
         return isNull(this.gameBoard);
     }
-    private int getFixedCellsPerQuadrant(GameDifficultyEnum difficulty) {
-        switch (difficulty) {
-            case EASY: return randBetween(3, 4);
-            case MEDIUM: return randBetween(2, 3);
-            case HARD: return randBetween(1, 2);
-            default: return 2;
-        }
-    }
-    private int randBetween(int min, int max) {
-        return new Random().nextInt((max - min) + 1) + min;
-    }
     private SudokuCell getCellAt(Map<JTextField, SudokuCell> cells, int row, int col) {
         return cells.values().stream()
                 .filter(c -> c.getRow() == row && c.getCol() == col)
@@ -216,5 +190,124 @@ public class GameController {
                 .filter(e -> e.getValue().getRow() == row && e.getValue().getCol() == col)
                 .map(Map.Entry::getKey)
                 .findFirst().orElse(null);
+    }
+
+    /**
+     * Gera um Sudoku válido completo usando backtracking
+     */
+    private void generateValidSudoku(Map<JTextField, SudokuCell> cells) {
+        Random rand = new Random();
+        
+        // Preenche a diagonal principal dos blocos 3x3 primeiro (mais fácil de validar)
+        for (int block = 0; block < 3; block++) {
+            fillDiagonalBlock(cells, block, rand);
+        }
+        
+        // Preenche o resto do tabuleiro usando backtracking
+        solveSudoku(cells, 0, 0);
+    }
+
+    /**
+     * Preenche um bloco diagonal 3x3 com números válidos
+     */
+    private void fillDiagonalBlock(Map<JTextField, SudokuCell> cells, int block, Random rand) {
+        int startRow = block * 3;
+        int startCol = block * 3;
+        
+        List<Integer> numbers = new ArrayList<>();
+        for (int i = 1; i <= 9; i++) {
+            numbers.add(i);
+        }
+        Collections.shuffle(numbers, rand);
+        
+        int index = 0;
+        for (int row = startRow; row < startRow + 3; row++) {
+            for (int col = startCol; col < startCol + 3; col++) {
+                SudokuCell cell = getCellAt(cells, row, col);
+                cell.setValue(numbers.get(index++));
+            }
+        }
+    }
+
+    /**
+     * Resolve o Sudoku usando backtracking
+     */
+    private boolean solveSudoku(Map<JTextField, SudokuCell> cells, int row, int col) {
+        if (row == 9) {
+            return true; // Tabuleiro completo
+        }
+        
+        if (col == 9) {
+            return solveSudoku(cells, row + 1, 0);
+        }
+        
+        SudokuCell cell = getCellAt(cells, row, col);
+        if (cell.getValue() != null && cell.getValue() != 0) {
+            return solveSudoku(cells, row, col + 1);
+        }
+        
+        // Tenta números de 1 a 9
+        for (int num = 1; num <= 9; num++) {
+            cell.setValue(num);
+            if (!hasDuplicateInRowOrColumnOrBlock(cell)) {
+                if (solveSudoku(cells, row, col + 1)) {
+                    return true;
+                }
+            }
+            cell.setValue(0);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Remove células baseado na dificuldade para criar o puzzle
+     */
+    private void removeCellsForDifficulty(Map<JTextField, SudokuCell> cells) {
+        Random rand = new Random();
+        int cellsToRemove = getCellsToRemove(this.gameDifficulty);
+        
+        List<SudokuCell> allCells = new ArrayList<>(cells.values());
+        Collections.shuffle(allCells, rand);
+        
+        int removed = 0;
+        for (SudokuCell cell : allCells) {
+            if (removed >= cellsToRemove) break;
+            
+            // Remove o valor da célula
+            cell.setValue(0);
+            cell.setFixed(false);
+            
+            // Limpa o campo de texto
+            JTextField tf = getTextFieldAt(cells, cell.getRow(), cell.getCol());
+            tf.setText("");
+            tf.setEditable(true);
+            tf.setBackground(Color.WHITE);
+            
+            removed++;
+        }
+        
+        // Marca as células restantes como fixas
+        for (SudokuCell cell : cells.values()) {
+            if (cell.getValue() != null && cell.getValue() != 0) {
+                cell.setFixed(true);
+                JTextField tf = getTextFieldAt(cells, cell.getRow(), cell.getCol());
+                tf.setText(String.valueOf(cell.getValue())); // Adiciona o valor ao campo de texto
+                tf.setEditable(false);
+                tf.setBackground(new Color(220, 220, 220));
+            }
+        }
+    }
+
+    /**
+     * Retorna o número de células a serem removidas baseado na dificuldade
+     */
+    private int getCellsToRemove(GameDifficultyEnum difficulty) {
+        switch (difficulty) {
+            case EASY: return 40;
+            case MEDIUM: return 50;
+            case HARD: return 60;
+            default: return 40;
+        }
     }
 }
