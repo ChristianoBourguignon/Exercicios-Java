@@ -37,11 +37,11 @@ public class GameController {
     public Map<JTextField, SudokuCell> getMap() {
         return gameBoard;
     }
+    public boolean gameIsStarted(){
+        return isNull(gameBoard);
+    }
 
     public GameStatusEnum startedGame() {
-        if (!isNull(gameBoard)) {
-            return STARTED;
-        }
 
         Map<JTextField, SudokuCell> cells = new HashMap<>();
         this.gameBoard = cells;
@@ -176,9 +176,6 @@ public class GameController {
         return isHaveCellEmpty.isPresent();
     }
 
-    public boolean gameIsStarted(){
-        return isNull(this.gameBoard);
-    }
     private SudokuCell getCellAt(Map<JTextField, SudokuCell> cells, int row, int col) {
         return cells.values().stream()
                 .filter(c -> c.getRow() == row && c.getCol() == col)
@@ -304,10 +301,9 @@ public class GameController {
      */
     private int getCellsToRemove(GameDifficultyEnum difficulty) {
         switch (difficulty) {
-            case EASY: return 40;
             case MEDIUM: return 50;
             case HARD: return 60;
-            default: return 40;
+            default: return 2;
         }
     }
 }
