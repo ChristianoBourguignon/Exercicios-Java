@@ -140,7 +140,7 @@ public class GameController {
     public GameStatusEnum finishGame() {
         // Verificar se o jogo ta iniciado
         if (gameIsStarted()) {
-            return GameStatusEnum.STARTED;
+            return NON_STARTED;
         }
 
         // Verificar se todas as células estão preenchidas
