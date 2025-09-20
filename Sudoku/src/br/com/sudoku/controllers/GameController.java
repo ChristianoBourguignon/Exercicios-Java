@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.List;
 
 import static br.com.sudoku.Main.BOARD_LIMIT;
-import static br.com.sudoku.Main.bindFieldToCell;
 import static br.com.sudoku.model.GameDifficultyEnum.*;
 import static br.com.sudoku.model.GameStatusEnum.*;
 import static java.util.Objects.isNull;
@@ -20,6 +19,7 @@ import static java.util.Objects.isNull;
 public class GameController {
     private Map<JTextField, SudokuCell> gameBoard;
     private GameDifficultyEnum gameDifficulty;
+    private GameStatusEnum gameStatus;
 
     public GameController(Integer difficulty) {
         switch(difficulty) {
@@ -33,6 +33,7 @@ public class GameController {
                 this.gameDifficulty = EASY;
                 break;
         }
+        this.gameStatus = NON_STARTED;
     }
     public Map<JTextField, SudokuCell> getMap() {
         return gameBoard;
@@ -41,7 +42,17 @@ public class GameController {
         return isNull(gameBoard);
     }
 
+    public void setGameStatus(GameStatusEnum gameDifficulty) {this.gameStatus = gameDifficulty;}
+
+    public GameStatusEnum checkStatus(){
+        return gameStatus;
+    }
+
     public GameStatusEnum startedGame() {
+
+        if(this.gameStatus.equals(STARTED)) {
+            return IN_STARTED;
+        }
 
         Map<JTextField, SudokuCell> cells = new HashMap<>();
         this.gameBoard = cells;
@@ -74,9 +85,13 @@ public class GameController {
         removeCellsForDifficulty(cells);
         
         this.gameBoard = cells;
+        this.gameStatus = IN_STARTED;
         return STARTED;
     }
 
+    /**
+     * Retorna true ou false, se haver o mesmo numero na linha,coluna ou quadrante..
+     */
     public boolean hasDuplicateInRowOrColumnOrBlock(SudokuCell target) {
         if (target == null) return false;
 
@@ -91,6 +106,9 @@ public class GameController {
 
         return rowConflict || colConflict || blockConflict;
     }
+    /**
+     * Retorna true ou false, se haver o mesmo numero no quadrante 3x3.
+     */
     public boolean hasDuplicateInBlock(SudokuCell target) {
         int row = target.getRow();
         int col = target.getCol();
@@ -106,6 +124,9 @@ public class GameController {
                 .filter(cell -> cell.getCol() >= startCol && cell.getCol() < startCol + 3)
                 .anyMatch(cell -> value.equals(cell.getValue()));
     }
+    /**
+     * Retorna true ou false, se haver o mesmo numero na linha.
+     */
     public boolean hasDuplicateInRow(SudokuCell target) {
         int row = target.getRow();
         Integer value = target.getValue();
@@ -115,6 +136,9 @@ public class GameController {
                 .filter(cell -> cell.getRow() == row)
                 .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
     }
+    /**
+     * Retorna true ou false, se haver o mesmo numero na coluna.
+     */
     public boolean hasDuplicateInCol(SudokuCell target) {
         int col = target.getCol();
         Integer value = target.getValue();
@@ -125,6 +149,9 @@ public class GameController {
                 .anyMatch(cell -> cell != target && value.equals(cell.getValue()));
     }
 
+    /**
+     * Limpa todos os valores dos JTextField, cujo as SudokuCell nao sejam fixas.
+     */
     public void clearGame() {
         if(gameIsStarted()){
             return;
@@ -136,6 +163,10 @@ public class GameController {
                     entry.getKey().setText("");
                 });
     }
+
+    /**
+     * Retorna status do jogo
+     */
 
     public GameStatusEnum finishGame() {
         // Verificar se o jogo ta iniciado
@@ -149,6 +180,10 @@ public class GameController {
         }
         return isCellValueDuplicated();
     }
+
+    /**
+     * Retorna o status do jogo, caso tenha valores duplicadas no JTextField
+     */
 
     private GameStatusEnum isCellValueDuplicated() {
         List<SudokuCell> cellsPositions = gameBoard.values().stream()
@@ -164,7 +199,9 @@ public class GameController {
             return COMPLETE;
         }
     }
-
+    /**
+     * Retorna true ou false, caso tenha celula vazia.
+     */
     private boolean isHaveCellEmpty() {
         Optional<SudokuCell> isHaveCellEmpty = gameBoard.values().stream()
                 .filter(cell -> !cell.isFixed())
@@ -176,12 +213,18 @@ public class GameController {
         return isHaveCellEmpty.isPresent();
     }
 
+    /**
+     * Retorna a SudokuCell que esta na posicao especificada no row  e col e se caso nao tiver, retorna null
+     */
     private SudokuCell getCellAt(Map<JTextField, SudokuCell> cells, int row, int col) {
         return cells.values().stream()
                 .filter(c -> c.getRow() == row && c.getCol() == col)
                 .findFirst().orElse(null);
     }
 
+    /**
+     * Retorna o JTextField que esta na posicao especificada no row  e col e se caso nao tiver, retorna null
+     */
     private JTextField getTextFieldAt(Map<JTextField, SudokuCell> cells, int row, int col) {
         return cells.entrySet().stream()
                 .filter(e -> e.getValue().getRow() == row && e.getValue().getCol() == col)
@@ -300,10 +343,42 @@ public class GameController {
      * Retorna o número de células a serem removidas baseado na dificuldade
      */
     private int getCellsToRemove(GameDifficultyEnum difficulty) {
-        switch (difficulty) {
-            case MEDIUM: return 50;
-            case HARD: return 60;
-            default: return 2;
-        }
+        return switch (difficulty) {
+            case MEDIUM -> 50;
+            case HARD -> 60;
+            default -> 30;
+        };
+    }
+
+    public static void bindFieldToCell(JTextField field, SudokuCell cell) {
+        field.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                updateCell();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                updateCell();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                updateCell();
+            }
+
+            private void updateCell() {
+                String text = field.getText();
+                if (text.isEmpty()) {
+                    cell.setValue(null);
+                } else {
+                    try {
+                        cell.setValue(Integer.parseInt(text));
+                    } catch (NumberFormatException ex) {
+                        cell.setValue(null);
+                    }
+                }
+            }
+        });
     }
 }
