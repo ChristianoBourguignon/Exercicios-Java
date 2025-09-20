@@ -296,15 +296,6 @@ O projeto utiliza `System.out.println()` para debug. Para logs mais avançados, 
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-### Sugestões de Melhorias
-
-- [ ] Implementar sistema de pontuação
-- [ ] Adicionar timer de jogo
-- [ ] Criar sistema de dicas
-- [ ] Implementar salvamento de progresso
-- [ ] Adicionar temas visuais
-- [ ] Criar modo multiplayer
-
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
