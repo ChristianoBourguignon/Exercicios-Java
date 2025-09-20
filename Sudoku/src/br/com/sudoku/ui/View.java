@@ -1,31 +1,36 @@
 package br.com.sudoku.ui;
 
 import br.com.sudoku.controllers.GameController;
+import br.com.sudoku.model.AudioClip;
 import br.com.sudoku.model.GameStatusEnum;
 import br.com.sudoku.model.SudokuCell;
-import br.com.sudoku.ui.custom.Button.ExitGameButton;
-import br.com.sudoku.ui.custom.Button.FinishGameButton;
-import br.com.sudoku.ui.custom.Button.ResetGameButton;
-import br.com.sudoku.ui.custom.Button.StartGameButton;
+import br.com.sudoku.ui.custom.Button.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 
 import static br.com.sudoku.model.GameDifficultyEnum.*;
+import static br.com.sudoku.model.GameStatusEnum.*;
 import static java.util.Objects.isNull;
 
 public class View extends JFrame implements ActionListener {
 
     private StartGameButton btnStart;
     private FinishGameButton btnFinish;
-    private ExitGameButton btnExit;
     private ResetGameButton btnReset;
+    private ResetDifficultyGameButton btnResetGame;
     private GameController gameBoard;
+    private AudioClip audio;
     private JPanel boardPanel;
 
     public View() {
@@ -34,6 +39,10 @@ public class View extends JFrame implements ActionListener {
         this.setLayout(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
+        this.audio = new AudioClip();
+
+        audio.carregar("");
+
 
         // Painel do tabuleiro 9x9
         this.boardPanel = new JPanel(new GridLayout(9, 9));
@@ -50,19 +59,19 @@ public class View extends JFrame implements ActionListener {
         // Botões
         btnStart = new StartGameButton();
         btnFinish = new FinishGameButton();
-        btnExit = new ExitGameButton();
         btnReset = new ResetGameButton();
+        btnResetGame = new ResetDifficultyGameButton();
 
         btnStart.addActionListener(this);
         btnFinish.addActionListener(this);
         btnReset.addActionListener(this);
-        btnExit.addActionListener(this);
+        btnResetGame.addActionListener(this);
 
         this.add(boardPanel);
         this.add(btnStart);
         this.add(btnFinish);
+        this.add(btnResetGame);
         this.add(btnReset);
-        this.add(btnExit);
 
         this.setVisible(true);
     }
@@ -81,14 +90,14 @@ public class View extends JFrame implements ActionListener {
                     choices,
                     choices[0]
             );
-            this.gameBoard = new GameController(optionStartedGame);
-            GameStatusEnum gse = this.gameBoard.startedGame();
-            if (GameStatusEnum.STARTED.equals(gse)) {
-                this.boardPanel.removeAll();
-                fillCells();
+            GameStatusEnum gse = null;
+            if(!isNull(this.gameBoard)) {
+                gse = this.gameBoard.checkStatus();
             } else {
-                JOptionPane.showMessageDialog(this, "O jogo não está iniciado!");
+                this.gameBoard = new GameController(optionStartedGame);
+                gse = this.gameBoard.startedGame();
             }
+            startGame(gse);
         }
         if(e.getSource() == btnFinish) {
             int optionFinishGame = JOptionPane.showConfirmDialog(
@@ -108,6 +117,7 @@ public class View extends JFrame implements ActionListener {
                         JOptionPane.showMessageDialog(this, "O jogo está incompleto!");
                         break;
                     case COMPLETE:
+                        audio.tocar();
                         JOptionPane.showMessageDialog(this, "Parabéns você completou o jogo!");
                         break;
                     default:
@@ -128,8 +138,33 @@ public class View extends JFrame implements ActionListener {
                 gameBoard.clearGame();
             }
         }
-        if(e.getSource() == btnExit) {
-            System.exit(0);
+        if(e.getSource() == btnResetGame) {
+            this.gameBoard.setGameStatus(STARTED);
+            String[] choices = {EASY.getLabel(), MEDIUM.getLabel(), HARD.getLabel()};
+            int optionStartedGame = JOptionPane.showOptionDialog(
+                    this,
+                    "Escolha a dificuldade do jogo",
+                    "Dificuldade",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    choices,
+                    choices[0]
+            );
+            this.gameBoard = new GameController(optionStartedGame);
+            GameStatusEnum gse = gameBoard.startedGame();
+
+            startGame(gse);
+        }
+    }
+    public void startGame(GameStatusEnum gse) {
+        if (STARTED.equals(gse) || NON_STARTED.equals(gse)) {
+            this.boardPanel.removeAll();
+            fillCells();
+        } else if (IN_STARTED.equals(gse)) {
+            JOptionPane.showMessageDialog(this, "O jogo já está iniciado!");
+        } else {
+            JOptionPane.showMessageDialog(this, "O jogo não está iniciado!");
         }
     }
     public void fillCells() {

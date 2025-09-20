@@ -5,7 +5,8 @@ public enum GameStatusEnum {
     STARTED("Iniciado"),
     INCOMPLETE("Incompleto"),
     COMPLETE("Completo"),
-    HAS_ERROR("Contém Erros");
+    HAS_ERROR("Contém Erros"),
+    IN_STARTED("Iniciado");
 
     private String label;
     GameStatusEnum(final String label){
